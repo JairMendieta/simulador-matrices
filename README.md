@@ -27,7 +27,7 @@ Un simulador interactivo de álgebra lineal que permite realizar operaciones con
 
 ## 🌐 Demo en Vivo
 
-Visita la aplicación en: [GitHub Pages](https://tu-usuario.github.io/simulador-algebra-lineal)
+Visita la aplicación en: [GitHub Pages](https://jairmendieta.github.io/simulador-matrices)
 
 ## 🔧 Tecnologías
 
