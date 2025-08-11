@@ -1,40 +1,47 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulador de Álgebra Lineal con Fórmulas</title>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Math.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
-    
-    <!-- PDF & Canvas Libraries for Reporting -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- No external libraries needed for print and HTML download -->
 
     <style>
         /* Custom styles for a retro, mono-spaced theme */
         body {
             font-family: 'Courier New', monospace;
         }
+
         .matrix-display-grid {
             display: grid;
-            gap: 0.5rem 1.5rem; /* row-gap column-gap */
+            gap: 0.5rem 1.5rem;
+            /* row-gap column-gap */
         }
+
         .input-grid-container {
             display: grid;
             gap: 0.5rem;
         }
+
         /* Custom spinner animation */
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
+
         .animate-spin-fast {
             animation: spin 0.6s linear infinite;
         }
+
         /* Styles for the custom modal */
         .modal-backdrop {
             position: fixed;
@@ -48,6 +55,7 @@
             align-items: center;
             z-index: 1000;
         }
+
         .modal-content {
             background-color: white;
             padding: 2rem;
@@ -57,6 +65,7 @@
         }
     </style>
 </head>
+
 <body class="bg-white text-black font-mono">
 
     <div class="container max-w-7xl mx-auto p-4 md:p-8">
@@ -66,24 +75,28 @@
 
         <!-- Container for Matrix Panels -->
         <div id="matrix-panels-container" class="space-y-6"></div>
-        
+
         <!-- Template for a Matrix Panel -->
         <template id="matrix-panel-template">
             <div class="border border-black p-5">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold">Matriz <span class="matrix-name"></span></h3>
-                    <button class="remove-matrix-btn bg-red-600 text-white py-1 px-3 text-sm font-bold transition-colors hover:bg-red-700 hidden">
+                    <button
+                        class="remove-matrix-btn bg-red-600 text-white py-1 px-3 text-sm font-bold transition-colors hover:bg-red-700 hidden">
                         Eliminar
                     </button>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                     <label>Filas:</label>
-                    <input type="number" value="2" min="1" class="rows-input w-16 p-2 border border-black text-center bg-white focus:outline-none focus:ring-2 focus:ring-black">
+                    <input type="number" value="2" min="1"
+                        class="rows-input w-16 p-2 border border-black text-center bg-white focus:outline-none focus:ring-2 focus:ring-black">
                     <span>x</span>
                     <label>Cols:</label>
-                    <input type="number" value="2" min="1" class="cols-input w-16 p-2 border border-black text-center bg-white focus:outline-none focus:ring-2 focus:ring-black">
-                    <button class="generate-grid-btn ml-auto bg-white text-black border border-black py-2 px-4 transition-colors hover:bg-gray-200">
+                    <input type="number" value="2" min="1"
+                        class="cols-input w-16 p-2 border border-black text-center bg-white focus:outline-none focus:ring-2 focus:ring-black">
+                    <button
+                        class="generate-grid-btn ml-auto bg-white text-black border border-black py-2 px-4 transition-colors hover:bg-gray-200">
                         Crear/Modificar
                     </button>
                 </div>
@@ -100,7 +113,8 @@
         </template>
 
         <div class="mt-6">
-            <button id="add-matrix-btn" class="w-full bg-black text-white py-3 px-4 transition-colors hover:bg-gray-800 text-lg font-bold">
+            <button id="add-matrix-btn"
+                class="w-full bg-black text-white py-3 px-4 transition-colors hover:bg-gray-800 text-lg font-bold">
                 [+] Añadir Matriz
             </button>
         </div>
@@ -110,11 +124,13 @@
             <h2 class="text-2xl font-bold border-b border-black pb-2 mb-4">Calculadora de Fórmulas</h2>
             <div class="flex flex-col gap-2">
                 <label for="formula-input" class="font-bold">Introduce tu operación:</label>
-                <input type="text" id="formula-input" placeholder="Ej: 2 * A + inv(B) - C" class="w-full p-3 border border-black bg-white focus:outline-none focus:ring-2 focus:ring-black text-lg">
+                <input type="text" id="formula-input" placeholder="Ej: 2 * A + inv(B) - C"
+                    class="w-full p-3 border border-black bg-white focus:outline-none focus:ring-2 focus:ring-black text-lg">
                 <p class="text-xs text-gray-600">
                     Usa los nombres de las matrices (A, B, ...). Funciones disponibles: inv(), transpose(), det(), etc.
                 </p>
-                <button id="calculate-btn" class="bg-blue-600 text-white py-3 px-4 transition-colors hover:bg-blue-700 text-lg font-bold mt-2">
+                <button id="calculate-btn"
+                    class="bg-blue-600 text-white py-3 px-4 transition-colors hover:bg-blue-700 text-lg font-bold mt-2">
                     Calcular
                 </button>
             </div>
@@ -132,7 +148,8 @@
         <div class="mt-8 border border-black p-5">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold">Historial de Operaciones</h2>
-                <button id="clear-history-btn" class="bg-red-600 text-white py-2 px-4 text-sm transition-colors hover:bg-red-700" disabled>
+                <button id="clear-history-btn"
+                    class="bg-red-600 text-white py-2 px-4 text-sm transition-colors hover:bg-red-700" disabled>
                     Limpiar Historial
                 </button>
             </div>
@@ -143,19 +160,18 @@
 
         <!-- Report Buttons -->
         <div class="mt-8 space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button id="generate-pdf-btn" class="bg-red-600 text-white py-3 px-4 transition-colors hover:bg-red-700 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-                    📄 GENERAR PDF
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button id="print-report-btn"
+                    class="bg-blue-600 text-white py-3 px-4 transition-colors hover:bg-blue-700 text-lg font-bold">
+                    IMPRIMIR REPORTE
                 </button>
-                <button id="print-report-btn" class="bg-blue-600 text-white py-3 px-4 transition-colors hover:bg-blue-700 text-lg font-bold">
-                    🖨️ IMPRIMIR REPORTE
-                </button>
-                <button id="generate-html-btn" class="bg-green-600 text-white py-3 px-4 transition-colors hover:bg-green-700 text-lg font-bold">
-                    🌐 DESCARGAR HTML
+                <button id="generate-html-btn"
+                    class="bg-green-600 text-white py-3 px-4 transition-colors hover:bg-green-700 text-lg font-bold">
+                    DESCARGAR HTML
                 </button>
             </div>
             <p class="text-xs text-gray-600 text-center">
-                <strong>PDF:</strong> Descarga directa | <strong>Imprimir:</strong> Abre ventana de impresión | <strong>HTML:</strong> Archivo web
+                <strong>Imprimir:</strong> Abre ventana de impresión | <strong>HTML:</strong> Archivo web descargable
             </p>
         </div>
 
@@ -163,7 +179,7 @@
             Simulador de Álgebra Lineal Flexible. La Matriz A es permanente.
         </footer>
     </div>
-    
+
     <!-- Custom Modal for Confirmation -->
     <div id="confirmation-modal" class="modal-backdrop hidden">
         <div class="modal-content">
@@ -176,402 +192,401 @@
     </div>
 
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // --- STATE MANAGEMENT ---
-    const state = {
-        matrices: {}, // { A: { data: [[1,2],[3,4]], rows: 2, cols: 2 }, B: null }
-        operationHistory: [], // { id, formula, result, timestamp, isError, resultMatrix }
-        isGeneratingPDF: false,
-    };
-    const EPSILON = 1e-10;
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- STATE MANAGEMENT ---
+            const state = {
+                matrices: {}, // { A: { data: [[1,2],[3,4]], rows: 2, cols: 2 }, B: null }
+                operationHistory: [], // { id, formula, result, timestamp, isError, resultMatrix }
+            };
+            const EPSILON = 1e-10;
 
-    // --- DOM ELEMENT REFERENCES ---
-    const matrixPanelsContainer = document.getElementById('matrix-panels-container');
-    const matrixPanelTemplate = document.getElementById('matrix-panel-template');
-    const addMatrixBtn = document.getElementById('add-matrix-btn');
-    const formulaInput = document.getElementById('formula-input');
-    const calculateBtn = document.getElementById('calculate-btn');
-    const resultPanel = document.getElementById('result-panel');
-    const resultTitle = document.getElementById('result-title');
-    const resultContent = document.getElementById('result-content');
-    const historyContainer = document.getElementById('history-container');
-    const clearHistoryBtn = document.getElementById('clear-history-btn');
-    const generatePdfBtn = document.getElementById('generate-pdf-btn');
-    const printReportBtn = document.getElementById('print-report-btn');
-    const generateHtmlBtn = document.getElementById('generate-html-btn');
-    const confirmationModal = document.getElementById('confirmation-modal');
-    const modalText = document.getElementById('modal-text');
-    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
-    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+            // --- DOM ELEMENT REFERENCES ---
+            const matrixPanelsContainer = document.getElementById('matrix-panels-container');
+            const matrixPanelTemplate = document.getElementById('matrix-panel-template');
+            const addMatrixBtn = document.getElementById('add-matrix-btn');
+            const formulaInput = document.getElementById('formula-input');
+            const calculateBtn = document.getElementById('calculate-btn');
+            const resultPanel = document.getElementById('result-panel');
+            const resultTitle = document.getElementById('result-title');
+            const resultContent = document.getElementById('result-content');
+            const historyContainer = document.getElementById('history-container');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
 
-
-    // --- UTILITY FUNCTIONS ---
-    const formatNumber = (num) => {
-        if (Math.abs(num) < EPSILON) num = 0;
-        return Number.isInteger(num) ? num.toString() : num.toFixed(3).replace(/\.?0+$/, "");
-    };
-
-    const findNextAvailableMatrixName = () => {
-        let charCode = 65; // Start from 'A'
-        while (true) {
-            const name = String.fromCharCode(charCode);
-            if (!state.matrices.hasOwnProperty(name)) {
-                return name;
-            }
-            charCode++;
-        }
-    };
-    
-    // --- CUSTOM MODAL/ALERT ---
-    let confirmCallback = null;
-
-    const showConfirmationModal = (text, callback) => {
-        modalText.textContent = text;
-        confirmCallback = callback;
-        confirmationModal.classList.remove('hidden');
-    };
-
-    const hideConfirmationModal = () => {
-        confirmationModal.classList.add('hidden');
-        confirmCallback = null;
-    };
-    
-    modalConfirmBtn.addEventListener('click', () => {
-        if (confirmCallback) {
-            confirmCallback();
-        }
-        hideConfirmationModal();
-    });
-
-    modalCancelBtn.addEventListener('click', hideConfirmationModal);
+            const printReportBtn = document.getElementById('print-report-btn');
+            const generateHtmlBtn = document.getElementById('generate-html-btn');
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const modalText = document.getElementById('modal-text');
+            const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+            const modalCancelBtn = document.getElementById('modal-cancel-btn');
 
 
-    // --- MATRIX PANEL LOGIC ---
-    const createMatrixPanel = (matrixName) => {
-        const panelFragment = matrixPanelTemplate.content.cloneNode(true);
-        const panelRoot = panelFragment.querySelector('.border');
-        panelRoot.dataset.matrixName = matrixName;
+            // --- UTILITY FUNCTIONS ---
+            const formatNumber = (num) => {
+                if (Math.abs(num) < EPSILON) num = 0;
+                return Number.isInteger(num) ? num.toString() : num.toFixed(3).replace(/\.?0+$/, "");
+            };
 
-        // Configure panel elements
-        panelRoot.querySelector('.matrix-name').textContent = matrixName;
-        const removeBtn = panelRoot.querySelector('.remove-matrix-btn');
-        if (matrixName !== 'A') {
-            removeBtn.classList.remove('hidden');
-            removeBtn.addEventListener('click', () => removeMatrix(matrixName));
-        }
-
-        const rowsInput = panelRoot.querySelector('.rows-input');
-        const colsInput = panelRoot.querySelector('.cols-input');
-        const generateGridBtn = panelRoot.querySelector('.generate-grid-btn');
-        const inputGridContainer = panelRoot.querySelector('.input-grid-container');
-        const confirmMatrixContainer = panelRoot.querySelector('.confirmed-matrix-container');
-
-        // Event listener for "Create/Modify" button
-        generateGridBtn.addEventListener('click', () => {
-            const rows = parseInt(rowsInput.value, 10);
-            const cols = parseInt(colsInput.value, 10);
-            if (rows < 1 || cols < 1 || isNaN(rows) || isNaN(cols)) {
-                // Simple feedback, can be improved with a toast notification
-                alert("Dimensiones inválidas.");
-                return;
-            }
-
-            inputGridContainer.innerHTML = ''; // Clear previous grid
-            inputGridContainer.classList.remove('hidden');
-            inputGridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.className = 'w-full p-2 border border-black text-center bg-white focus:outline-none focus:ring-2 focus:ring-black';
-                    input.dataset.row = i;
-                    input.dataset.col = j;
-                    // Pre-fill with existing data if available
-                    const existingValue = state.matrices[matrixName]?.data?.[i]?.[j];
-                    input.value = existingValue !== undefined ? existingValue : 0;
-                    inputGridContainer.appendChild(input);
+            const findNextAvailableMatrixName = () => {
+                let charCode = 65; // Start from 'A'
+                while (true) {
+                    const name = String.fromCharCode(charCode);
+                    if (!state.matrices.hasOwnProperty(name)) {
+                        return name;
+                    }
+                    charCode++;
                 }
-            }
+            };
 
-            const confirmBtn = document.createElement('button');
-            confirmBtn.textContent = `Confirmar Matriz ${matrixName}`;
-            confirmBtn.className = 'bg-black text-white py-2 px-4 transition-colors hover:bg-gray-800 mt-2';
-            confirmBtn.style.gridColumn = `1 / -1`; // Span all columns
-            inputGridContainer.appendChild(confirmBtn);
+            // --- CUSTOM MODAL/ALERT ---
+            let confirmCallback = null;
 
-            confirmBtn.addEventListener('click', () => confirmMatrix(matrixName));
-            
-            // Reset matrix data until confirmed
-            state.matrices[matrixName] = null;
-            confirmMatrixContainer.classList.add('hidden');
-        });
+            const showConfirmationModal = (text, callback) => {
+                modalText.textContent = text;
+                confirmCallback = callback;
+                confirmationModal.classList.remove('hidden');
+            };
 
-        matrixPanelsContainer.appendChild(panelFragment);
-    };
+            const hideConfirmationModal = () => {
+                confirmationModal.classList.add('hidden');
+                confirmCallback = null;
+            };
 
-    const confirmMatrix = (matrixName) => {
-        const panelRoot = matrixPanelsContainer.querySelector(`[data-matrix-name="${matrixName}"]`);
-        const inputs = panelRoot.querySelectorAll('.input-grid-container input');
-        const rows = parseInt(panelRoot.querySelector('.rows-input').value, 10);
-        const cols = parseInt(panelRoot.querySelector('.cols-input').value, 10);
-        
-        const tempData = Array(rows).fill(0).map(() => Array(cols).fill(0));
-        let isValid = true;
-
-        inputs.forEach(input => {
-            const i = parseInt(input.dataset.row, 10);
-            const j = parseInt(input.dataset.col, 10);
-            const value = parseFloat(input.value);
-            if (isNaN(value)) {
-                isValid = false;
-            }
-            tempData[i][j] = value;
-        });
-
-        if (!isValid) {
-            alert('Hay valores no válidos en la matriz.');
-            return;
-        }
-
-        state.matrices[matrixName] = { data: tempData, rows, cols };
-        
-        // Hide input grid and show confirmed matrix display
-        panelRoot.querySelector('.input-grid-container').classList.add('hidden');
-        renderConfirmedMatrix(matrixName);
-    };
-    
-    const renderConfirmedMatrix = (matrixName) => {
-        const panelRoot = matrixPanelsContainer.querySelector(`[data-matrix-name="${matrixName}"]`);
-        const matrixData = state.matrices[matrixName];
-        if (!matrixData) return;
-
-        const container = panelRoot.querySelector('.confirmed-matrix-container');
-        container.querySelector('.matrix-dims').textContent = `(${matrixData.rows}x${matrixData.cols})`;
-        container.innerHTML = `<h4 class="font-bold">Confirmada (${matrixData.rows}x${matrixData.cols})</h4>`; // Clear previous
-        
-        const displayElement = createMatrixDisplayElement(matrixData.data);
-        container.appendChild(displayElement);
-        container.classList.remove('hidden');
-    };
-
-    const addNewMatrix = () => {
-        const matrixName = findNextAvailableMatrixName();
-        state.matrices[matrixName] = null;
-        createMatrixPanel(matrixName);
-    };
-
-    const removeMatrix = (matrixName) => {
-        delete state.matrices[matrixName];
-        const panel = matrixPanelsContainer.querySelector(`[data-matrix-name="${matrixName}"]`);
-        if (panel) {
-            panel.remove();
-        }
-    };
-
-    // --- CALCULATION LOGIC ---
-    const runFormulaCalculation = () => {
-        const formula = formulaInput.value.trim();
-        if (!formula) {
-            updateResult("Error", "Por favor, introduce una fórmula.", true);
-            addToHistory(formula, "Por favor, introduce una fórmula.", true);
-            return;
-        }
-
-        const scope = {};
-        for (const name in state.matrices) {
-            if (state.matrices[name]) {
-                scope[name] = math.matrix(state.matrices[name].data);
-            }
-        }
-
-        try {
-            const evalResult = math.evaluate(formula, scope);
-            const title = `Resultado de: ${formula}`;
-
-            if (typeof evalResult === 'number') {
-                const resultText = `El resultado es el escalar: ${formatNumber(evalResult)}`;
-                updateResult(title, resultText, false);
-                addToHistory(formula, `Escalar: ${formatNumber(evalResult)}`, false);
-            } else if (evalResult && evalResult.toArray) {
-                const matrixResult = evalResult.toArray();
-                updateResult(title, '', false, true, matrixResult);
-                addToHistory(formula, `Matriz ${matrixResult.length}x${matrixResult[0].length}`, false, matrixResult);
-            } else {
-                const errorMsg = "El resultado no es un escalar ni una matriz válida.";
-                updateResult("Error", errorMsg, true);
-                addToHistory(formula, errorMsg, true);
-            }
-        } catch (e) {
-            const errorMsg = `Error en la fórmula: ${e.message}`;
-            updateResult("Error", errorMsg, true);
-            addToHistory(formula, errorMsg, true);
-        }
-    };
-    
-    const updateResult = (title, content, isError, isMatrix = false, matrixData = null) => {
-        resultTitle.textContent = title;
-        resultContent.innerHTML = ''; // Clear previous content
-
-        if (isError) {
-            const p = document.createElement('p');
-            p.className = 'border-l-4 border-red-600 pl-4 font-bold text-red-600';
-            p.textContent = content;
-            resultContent.appendChild(p);
-        } else if (isMatrix && matrixData) {
-            const matrixDisplay = createMatrixDisplayElement(matrixData);
-            resultContent.appendChild(matrixDisplay);
-        } else {
-            resultContent.innerHTML = content;
-        }
-    };
-
-    const createMatrixDisplayElement = (matrix) => {
-        if (!matrix || matrix.length === 0) return null;
-        const rows = matrix.length;
-        const cols = matrix[0].length;
-
-        const container = document.createElement('div');
-        container.className = 'inline-block my-2';
-
-        const grid = document.createElement('div');
-        grid.className = 'border-l-2 border-r-2 border-black p-2 matrix-display-grid';
-        grid.style.gridTemplateColumns = `repeat(${cols}, auto)`;
-
-        matrix.forEach(row => {
-            row.forEach(cell => {
-                const cellDiv = document.createElement('div');
-                cellDiv.className = 'text-right';
-                cellDiv.textContent = formatNumber(cell);
-                grid.appendChild(cellDiv);
+            modalConfirmBtn.addEventListener('click', () => {
+                if (confirmCallback) {
+                    confirmCallback();
+                }
+                hideConfirmationModal();
             });
-        });
 
-        container.appendChild(grid);
-        return container;
-    };
+            modalCancelBtn.addEventListener('click', hideConfirmationModal);
 
 
-    // --- HISTORY LOGIC ---
-    const addToHistory = (formula, result, isError, resultMatrix) => {
-        const newOperation = {
-            id: Date.now().toString(),
-            formula: formula || 'N/A',
-            result,
-            timestamp: new Date(),
-            isError,
-            resultMatrix
-        };
-        state.operationHistory.unshift(newOperation); // Add to beginning
-        renderHistory();
-    };
+            // --- MATRIX PANEL LOGIC ---
+            const createMatrixPanel = (matrixName) => {
+                const panelFragment = matrixPanelTemplate.content.cloneNode(true);
+                const panelRoot = panelFragment.querySelector('.border');
+                panelRoot.dataset.matrixName = matrixName;
 
-    const renderHistory = () => {
-        historyContainer.innerHTML = ''; // Clear
-        if (state.operationHistory.length === 0) {
-            historyContainer.innerHTML = '<p class="text-gray-600">No hay operaciones en el historial.</p>';
-            clearHistoryBtn.disabled = true;
-        } else {
-            const historyList = document.createElement('div');
-            historyList.className = 'space-y-2';
-            state.operationHistory.forEach(op => {
-                const item = document.createElement('div');
-                item.className = `p-3 border-l-4 ${op.isError ? 'border-red-500 bg-red-50' : 'border-blue-500 bg-blue-50'}`;
-                item.innerHTML = `
+                // Configure panel elements
+                panelRoot.querySelector('.matrix-name').textContent = matrixName;
+                const removeBtn = panelRoot.querySelector('.remove-matrix-btn');
+                if (matrixName !== 'A') {
+                    removeBtn.classList.remove('hidden');
+                    removeBtn.addEventListener('click', () => removeMatrix(matrixName));
+                }
+
+                const rowsInput = panelRoot.querySelector('.rows-input');
+                const colsInput = panelRoot.querySelector('.cols-input');
+                const generateGridBtn = panelRoot.querySelector('.generate-grid-btn');
+                const inputGridContainer = panelRoot.querySelector('.input-grid-container');
+                const confirmMatrixContainer = panelRoot.querySelector('.confirmed-matrix-container');
+
+                // Event listener for "Create/Modify" button
+                generateGridBtn.addEventListener('click', () => {
+                    const rows = parseInt(rowsInput.value, 10);
+                    const cols = parseInt(colsInput.value, 10);
+                    if (rows < 1 || cols < 1 || isNaN(rows) || isNaN(cols)) {
+                        // Simple feedback, can be improved with a toast notification
+                        alert("Dimensiones inválidas.");
+                        return;
+                    }
+
+                    inputGridContainer.innerHTML = ''; // Clear previous grid
+                    inputGridContainer.classList.remove('hidden');
+                    inputGridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+                    for (let i = 0; i < rows; i++) {
+                        for (let j = 0; j < cols; j++) {
+                            const input = document.createElement('input');
+                            input.type = 'number';
+                            input.className = 'w-full p-2 border border-black text-center bg-white focus:outline-none focus:ring-2 focus:ring-black';
+                            input.dataset.row = i;
+                            input.dataset.col = j;
+                            // Pre-fill with existing data if available
+                            const existingValue = state.matrices[matrixName]?.data?.[i]?.[j];
+                            input.value = existingValue !== undefined ? existingValue : 0;
+                            inputGridContainer.appendChild(input);
+                        }
+                    }
+
+                    const confirmBtn = document.createElement('button');
+                    confirmBtn.textContent = `Confirmar Matriz ${matrixName}`;
+                    confirmBtn.className = 'bg-black text-white py-2 px-4 transition-colors hover:bg-gray-800 mt-2';
+                    confirmBtn.style.gridColumn = `1 / -1`; // Span all columns
+                    inputGridContainer.appendChild(confirmBtn);
+
+                    confirmBtn.addEventListener('click', () => confirmMatrix(matrixName));
+
+                    // Reset matrix data until confirmed
+                    state.matrices[matrixName] = null;
+                    confirmMatrixContainer.classList.add('hidden');
+                });
+
+                matrixPanelsContainer.appendChild(panelFragment);
+            };
+
+            const confirmMatrix = (matrixName) => {
+                const panelRoot = matrixPanelsContainer.querySelector(`[data-matrix-name="${matrixName}"]`);
+                const inputs = panelRoot.querySelectorAll('.input-grid-container input');
+                const rows = parseInt(panelRoot.querySelector('.rows-input').value, 10);
+                const cols = parseInt(panelRoot.querySelector('.cols-input').value, 10);
+
+                const tempData = Array(rows).fill(0).map(() => Array(cols).fill(0));
+                let isValid = true;
+
+                inputs.forEach(input => {
+                    const i = parseInt(input.dataset.row, 10);
+                    const j = parseInt(input.dataset.col, 10);
+                    const value = parseFloat(input.value);
+                    if (isNaN(value)) {
+                        isValid = false;
+                    }
+                    tempData[i][j] = value;
+                });
+
+                if (!isValid) {
+                    alert('Hay valores no válidos en la matriz.');
+                    return;
+                }
+
+                state.matrices[matrixName] = { data: tempData, rows, cols };
+
+                // Hide input grid and show confirmed matrix display
+                panelRoot.querySelector('.input-grid-container').classList.add('hidden');
+                renderConfirmedMatrix(matrixName);
+            };
+
+            const renderConfirmedMatrix = (matrixName) => {
+                const panelRoot = matrixPanelsContainer.querySelector(`[data-matrix-name="${matrixName}"]`);
+                const matrixData = state.matrices[matrixName];
+                if (!matrixData) return;
+
+                const container = panelRoot.querySelector('.confirmed-matrix-container');
+                container.querySelector('.matrix-dims').textContent = `(${matrixData.rows}x${matrixData.cols})`;
+                container.innerHTML = `<h4 class="font-bold">Confirmada (${matrixData.rows}x${matrixData.cols})</h4>`; // Clear previous
+
+                const displayElement = createMatrixDisplayElement(matrixData.data);
+                container.appendChild(displayElement);
+                container.classList.remove('hidden');
+            };
+
+            const addNewMatrix = () => {
+                const matrixName = findNextAvailableMatrixName();
+                state.matrices[matrixName] = null;
+                createMatrixPanel(matrixName);
+            };
+
+            const removeMatrix = (matrixName) => {
+                delete state.matrices[matrixName];
+                const panel = matrixPanelsContainer.querySelector(`[data-matrix-name="${matrixName}"]`);
+                if (panel) {
+                    panel.remove();
+                }
+            };
+
+            // --- CALCULATION LOGIC ---
+            const runFormulaCalculation = () => {
+                const formula = formulaInput.value.trim();
+                if (!formula) {
+                    updateResult("Error", "Por favor, introduce una fórmula.", true);
+                    addToHistory(formula, "Por favor, introduce una fórmula.", true);
+                    return;
+                }
+
+                const scope = {};
+                for (const name in state.matrices) {
+                    if (state.matrices[name]) {
+                        scope[name] = math.matrix(state.matrices[name].data);
+                    }
+                }
+
+                try {
+                    const evalResult = math.evaluate(formula, scope);
+                    const title = `Resultado de: ${formula}`;
+
+                    if (typeof evalResult === 'number') {
+                        const resultText = `El resultado es el escalar: ${formatNumber(evalResult)}`;
+                        updateResult(title, resultText, false);
+                        addToHistory(formula, `Escalar: ${formatNumber(evalResult)}`, false);
+                    } else if (evalResult && evalResult.toArray) {
+                        const matrixResult = evalResult.toArray();
+                        updateResult(title, '', false, true, matrixResult);
+                        addToHistory(formula, `Matriz ${matrixResult.length}x${matrixResult[0].length}`, false, matrixResult);
+                    } else {
+                        const errorMsg = "El resultado no es un escalar ni una matriz válida.";
+                        updateResult("Error", errorMsg, true);
+                        addToHistory(formula, errorMsg, true);
+                    }
+                } catch (e) {
+                    const errorMsg = `Error en la fórmula: ${e.message}`;
+                    updateResult("Error", errorMsg, true);
+                    addToHistory(formula, errorMsg, true);
+                }
+            };
+
+            const updateResult = (title, content, isError, isMatrix = false, matrixData = null) => {
+                resultTitle.textContent = title;
+                resultContent.innerHTML = ''; // Clear previous content
+
+                if (isError) {
+                    const p = document.createElement('p');
+                    p.className = 'border-l-4 border-red-600 pl-4 font-bold text-red-600';
+                    p.textContent = content;
+                    resultContent.appendChild(p);
+                } else if (isMatrix && matrixData) {
+                    const matrixDisplay = createMatrixDisplayElement(matrixData);
+                    resultContent.appendChild(matrixDisplay);
+                } else {
+                    resultContent.innerHTML = content;
+                }
+            };
+
+            const createMatrixDisplayElement = (matrix) => {
+                if (!matrix || matrix.length === 0) return null;
+                const rows = matrix.length;
+                const cols = matrix[0].length;
+
+                const container = document.createElement('div');
+                container.className = 'inline-block my-2';
+
+                const grid = document.createElement('div');
+                grid.className = 'border-l-2 border-r-2 border-black p-2 matrix-display-grid';
+                grid.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+
+                matrix.forEach(row => {
+                    row.forEach(cell => {
+                        const cellDiv = document.createElement('div');
+                        cellDiv.className = 'text-right';
+                        cellDiv.textContent = formatNumber(cell);
+                        grid.appendChild(cellDiv);
+                    });
+                });
+
+                container.appendChild(grid);
+                return container;
+            };
+
+
+            // --- HISTORY LOGIC ---
+            const addToHistory = (formula, result, isError, resultMatrix) => {
+                const newOperation = {
+                    id: Date.now().toString(),
+                    formula: formula || 'N/A',
+                    result,
+                    timestamp: new Date(),
+                    isError,
+                    resultMatrix
+                };
+                state.operationHistory.unshift(newOperation); // Add to beginning
+                renderHistory();
+            };
+
+            const renderHistory = () => {
+                historyContainer.innerHTML = ''; // Clear
+                if (state.operationHistory.length === 0) {
+                    historyContainer.innerHTML = '<p class="text-gray-600">No hay operaciones en el historial.</p>';
+                    clearHistoryBtn.disabled = true;
+                } else {
+                    const historyList = document.createElement('div');
+                    historyList.className = 'space-y-2';
+                    state.operationHistory.forEach(op => {
+                        const item = document.createElement('div');
+                        item.className = `p-3 border-l-4 ${op.isError ? 'border-red-500 bg-red-50' : 'border-blue-500 bg-blue-50'}`;
+                        item.innerHTML = `
                     <div class="font-bold">${op.formula}</div>
                     <div class="text-sm">${op.result}</div>
                     <div class="text-xs text-gray-500 mt-1">${op.timestamp.toLocaleString('es-ES')}</div>
                 `;
-                historyList.appendChild(item);
-            });
-            historyContainer.appendChild(historyList);
-            clearHistoryBtn.disabled = false;
-        }
-    };
-
-    const clearHistory = () => {
-        showConfirmationModal('¿Estás seguro de que quieres limpiar el historial de operaciones?', () => {
-            state.operationHistory = [];
-            renderHistory();
-        });
-    };
-    
-    // --- REPORTING LOGIC ---
-    const createReportHTML = (isForPrint = false) => {
-        const currentDate = new Date().toLocaleString("es-ES");
-        const definedMatrices = Object.entries(state.matrices).filter(([_, data]) => data !== null);
-
-        let matricesHTML = '';
-        if (definedMatrices.length === 0) {
-            matricesHTML = `<p>No hay matrices definidas.</p>`;
-        } else {
-            definedMatrices.forEach(([name, data]) => {
-                if (data) {
-                    let matrixTable = '<table class="matrix-table" style="border-collapse: collapse;">';
-                    data.data.forEach(row => {
-                        matrixTable += '<tr>';
-                        row.forEach(cell => {
-                            matrixTable += `<td style="padding: 4px 12px; text-align: right; font-weight: bold;">${formatNumber(cell)}</td>`;
-                        });
-                        matrixTable += '</tr>';
+                        historyList.appendChild(item);
                     });
-                    matrixTable += '</table>';
+                    historyContainer.appendChild(historyList);
+                    clearHistoryBtn.disabled = false;
+                }
+            };
 
-                    matricesHTML += `
-                        <div class="matrix-container" style="margin: 15px 0; page-break-inside: avoid;">
-                            <div class="matrix-name" style="font-weight: bold; margin-bottom: 8px;">Matriz ${name} (${data.rows}x${data.cols}):</div>
-                            <div class="matrix-display" style="border-left: 3px solid #000; border-right: 3px solid #000; padding: 10px; display: inline-block; background-color: #f9f9f9;">
+            const clearHistory = () => {
+                showConfirmationModal('¿Estás seguro de que quieres limpiar el historial de operaciones?', () => {
+                    state.operationHistory = [];
+                    renderHistory();
+                });
+            };
+
+            // --- REPORTING LOGIC ---
+            const createReportHTML = (isForPrint = false) => {
+                const currentDate = new Date().toLocaleString("es-ES");
+                const definedMatrices = Object.entries(state.matrices).filter(([_, data]) => data !== null);
+
+                let matricesHTML = '';
+                if (definedMatrices.length === 0) {
+                    matricesHTML = `<p>No hay matrices definidas.</p>`;
+                } else {
+                    definedMatrices.forEach(([name, data]) => {
+                        if (data) {
+                            let matrixTable = '<table style="border-collapse: separate; border-spacing: 0; font-family: \'Courier New\', monospace;">';
+                            data.data.forEach(row => {
+                                matrixTable += '<tr>';
+                                row.forEach(cell => {
+                                    matrixTable += `<td style="padding: 8px 12px; text-align: right; font-weight: bold; color: #000; background-color: transparent; border: 1px solid #ccc; min-width: 40px;">${formatNumber(cell)}</td>`;
+                                });
+                                matrixTable += '</tr>';
+                            });
+                            matrixTable += '</table>';
+
+                            matricesHTML += `
+                        <div class="matrix-container" style="margin: 20px 0; page-break-inside: avoid;">
+                            <div class="matrix-name" style="font-weight: bold; margin-bottom: 10px; color: #000; font-size: 14px;">Matriz ${name} (${data.rows}x${data.cols}):</div>
+                            <div class="matrix-display" style="border-left: 4px solid #000; border-right: 4px solid #000; padding: 15px; display: inline-block; background-color: #ffffff; margin: 10px 0;">
                                 ${matrixTable}
                             </div>
                         </div>`;
+                        }
+                    });
                 }
-            });
-        }
 
-        let historyHTML = '';
-        if (state.operationHistory.length === 0) {
-            historyHTML = `<p>No se han realizado operaciones.</p>`;
-        } else {
-            state.operationHistory.slice().reverse().forEach((op, index) => {
-                const bgColor = op.isError ? "#ffebee" : "#e3f2fd";
-                const borderColor = op.isError ? "#f44336" : "#2196f3";
-                let resultMatrixHTML = '';
-                if (op.resultMatrix && !op.isError) {
-                     let matrixTable = '<table style="border-collapse: collapse;">';
-                     op.resultMatrix.forEach(row => {
-                         matrixTable += '<tr>';
-                         row.forEach(cell => {
-                            matrixTable += `<td style="padding: 2px 8px; text-align: right;">${formatNumber(cell)}</td>`;
-                         });
-                         matrixTable += '</tr>';
-                     });
-                     matrixTable += '</table>';
-                     resultMatrixHTML = `
-                        <div style="margin-top: 10px;">
-                            <div style="font-weight: bold; margin-bottom: 5px;">Matriz resultado:</div>
-                            <div style="border-left: 2px solid #000; border-right: 2px solid #000; padding: 8px; display: inline-block; background-color: #fff;">
+                let historyHTML = '';
+                if (state.operationHistory.length === 0) {
+                    historyHTML = `<p>No se han realizado operaciones.</p>`;
+                } else {
+                    state.operationHistory.slice().reverse().forEach((op, index) => {
+                        const bgColor = op.isError ? "#ffebee" : "#e3f2fd";
+                        const borderColor = op.isError ? "#f44336" : "#2196f3";
+                        let resultMatrixHTML = '';
+                        if (op.resultMatrix && !op.isError) {
+                            let matrixTable = '<table style="border-collapse: separate; border-spacing: 0; font-family: \'Courier New\', monospace;">';
+                            op.resultMatrix.forEach(row => {
+                                matrixTable += '<tr>';
+                                row.forEach(cell => {
+                                    matrixTable += `<td style="padding: 6px 10px; text-align: right; color: #000; background-color: transparent; border: 1px solid #ccc; min-width: 35px; font-weight: bold;">${formatNumber(cell)}</td>`;
+                                });
+                                matrixTable += '</tr>';
+                            });
+                            matrixTable += '</table>';
+                            resultMatrixHTML = `
+                        <div style="margin-top: 15px;">
+                            <div style="font-weight: bold; margin-bottom: 8px; color: #000;">Matriz resultado:</div>
+                            <div style="border-left: 3px solid #000; border-right: 3px solid #000; padding: 12px; display: inline-block; background-color: #ffffff;">
                                 ${matrixTable}
                             </div>
                         </div>`;
-                }
+                        }
 
-                historyHTML += `
+                        historyHTML += `
                     <div class="operation" style="margin: 15px 0; padding: 12px; border-left: 4px solid ${borderColor}; background-color: ${bgColor}; page-break-inside: avoid;">
                         <div style="font-weight: bold; margin-bottom: 5px;">Operación ${index + 1}: ${op.formula}</div>
                         <div style="margin-bottom: 5px;"><strong>Resultado:</strong> ${op.result}</div>
                         <div style="font-size: 11px; color: #666;">${op.timestamp.toLocaleString("es-ES")}</div>
                         ${resultMatrixHTML}
                     </div>`;
-            });
-        }
-        
-        const totalOps = state.operationHistory.length;
-        const successOps = state.operationHistory.filter(op => !op.isError).length;
-        const errorOps = totalOps - successOps;
-        const successRate = totalOps > 0 ? ((successOps / totalOps) * 100).toFixed(1) : 0;
+                    });
+                }
 
-        const printStyles = isForPrint ? `
+                const totalOps = state.operationHistory.length;
+                const successOps = state.operationHistory.filter(op => !op.isError).length;
+                const errorOps = totalOps - successOps;
+                const successRate = totalOps > 0 ? ((successOps / totalOps) * 100).toFixed(1) : 0;
+
+                const printStyles = isForPrint ? `
             <style>
                 @media print { body { margin: 0; font-size: 12px; } .no-print { display: none; } .page-break { page-break-before: always; } }
                 body { font-family: 'Courier New', monospace; margin: 20px; line-height: 1.4; color: #000; }
@@ -583,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </style>
         ` : '';
 
-        return `
+                return `
             <!DOCTYPE html>
             <html lang="es">
             <head>
@@ -619,108 +634,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </body>
             </html>`;
-    };
+            };
 
-    const generatePDFReport = async () => {
-        if (state.isGeneratingPDF) return;
-        state.isGeneratingPDF = true;
-        generatePdfBtn.disabled = true;
-        generatePdfBtn.innerHTML = `<span class="inline-block animate-spin-fast mr-2">⏳</span> Generando PDF...`;
 
-        try {
-            const { jsPDF } = window.jspdf;
-            const reportContent = createReportHTML(false);
 
-            const element = document.createElement("div");
-            element.innerHTML = reportContent;
-            element.style.position = "absolute";
-            element.style.left = "-9999px";
-            element.style.width = "210mm";
-            element.style.backgroundColor = "white";
-            document.body.appendChild(element);
+            const printReport = () => {
+                const reportContent = createReportHTML(true);
+                const printWindow = window.open("", "_blank");
+                if (printWindow) {
+                    printWindow.document.write(reportContent);
+                    printWindow.document.close();
+                    printWindow.focus();
+                    setTimeout(() => {
+                        printWindow.print();
+                    }, 500);
+                }
+            };
 
-            const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-            document.body.removeChild(element);
-            
-            const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-            const imgData = canvas.toDataURL("image/png");
-            const imgWidth = 210;
-            const pageHeight = 295;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 0;
+            const downloadHTMLReport = () => {
+                const reportContent = createReportHTML(true); // use print-friendly version
+                const blob = new Blob([reportContent], { type: "text/html;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `reporte-algebra-lineal-${new Date().toISOString().split("T")[0]}.html`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
 
-            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
+            // --- EVENT LISTENERS ---
+            addMatrixBtn.addEventListener('click', addNewMatrix);
+            calculateBtn.addEventListener('click', runFormulaCalculation);
+            formulaInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    runFormulaCalculation();
+                }
+            });
+            clearHistoryBtn.addEventListener('click', clearHistory);
 
-            while (heightLeft > 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
+            printReportBtn.addEventListener('click', printReport);
+            generateHtmlBtn.addEventListener('click', downloadHTMLReport);
 
-            pdf.save(`reporte-algebra-lineal-${new Date().toISOString().split("T")[0]}.pdf`);
+            // --- INITIALIZATION ---
+            const init = () => {
+                state.matrices['A'] = null;
+                createMatrixPanel('A');
+                renderHistory();
+            };
 
-        } catch (error) {
-            console.error("Error generando PDF:", error);
-            alert("Error al generar el PDF. Intenta con el reporte HTML o la opción de imprimir.");
-        } finally {
-            state.isGeneratingPDF = false;
-            generatePdfBtn.disabled = false;
-            generatePdfBtn.innerHTML = `📄 GENERAR PDF`;
-        }
-    };
-
-    const printReport = () => {
-        const reportContent = createReportHTML(true);
-        const printWindow = window.open("", "_blank");
-        if (printWindow) {
-            printWindow.document.write(reportContent);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-            }, 500);
-        }
-    };
-
-    const downloadHTMLReport = () => {
-        const reportContent = createReportHTML(true); // use print-friendly version
-        const blob = new Blob([reportContent], { type: "text/html;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `reporte-algebra-lineal-${new Date().toISOString().split("T")[0]}.html`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    };
-
-    // --- EVENT LISTENERS ---
-    addMatrixBtn.addEventListener('click', addNewMatrix);
-    calculateBtn.addEventListener('click', runFormulaCalculation);
-    formulaInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            runFormulaCalculation();
-        }
-    });
-    clearHistoryBtn.addEventListener('click', clearHistory);
-    generatePdfBtn.addEventListener('click', generatePDFReport);
-    printReportBtn.addEventListener('click', printReport);
-    generateHtmlBtn.addEventListener('click', downloadHTMLReport);
-
-    // --- INITIALIZATION ---
-    const init = () => {
-        state.matrices['A'] = null;
-        createMatrixPanel('A');
-        renderHistory();
-    };
-
-    init();
-});
-</script>
+            init();
+        });
+    </script>
 
 </body>
+
 </html>
